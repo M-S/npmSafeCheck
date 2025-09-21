@@ -1,39 +1,55 @@
 #!/bin/bash
-# npm check if the packages installed or to be installed is safe or not
+# Script to check if installed or to-be-installed npm packages are listed as insecure
+
+# Color codes for output formatting
 RED='\033[0;31m'
 NC='\033[0m'
 YLW='\033[1;33m'
 GRN='\033[0;32m'
+
+# Load insecure package names from JSON file
 INSECURE_PACKAGES=$(jq -r '.[]' npmMalwareChecklist.json)
+# Alternative: Fetch insecure package list from remote source
 # INSECURE_PACKAGES=$(curl -s https://gist.githubusercontent.com/M-S/7cbfd290c446e228b0c0f1f301fe678b/raw/85a1a25aae2ce228eefd0b0fc85c62bc6b07a1a3/npmMalwareChecklist.json | jq -r '.[]')
-FOUND_INSECURE_PACKAGES=0
+
+FOUND_INSECURE_PACKAGES=0 # Counter for insecure packages found
+
+# Get list of already installed npm packages
 PACKAGES_ALREADY_INSTALLED=$(npm ls --all)
+
+# Check if any installed package matches the insecure list
 for INSECURE_PKG in $(jq -r '.[]' npmMalwareChecklist.json); do
-    if [ $(echo "$PACKAGES_ALREADY_INSTALLED" | grep "$INSECURE_PKG"  | wc -l) -gt 0 ]; then
+  if [ $(echo "$PACKAGES_ALREADY_INSTALLED" | grep "$INSECURE_PKG"  | wc -l) -gt 0 ]; then
     echo "${YLW}Warning: "$INSECURE_PKG" package found in the installed packages.${NC}"
     FOUND_INSECURE_PACKAGES=$((FOUND_INSECURE_PACKAGES + 1))
-    fi
-done 
-  if [ $FOUND_INSECURE_PACKAGES -gt 0 ]; then
-    echo "${RED}RED ALERT: INSECURE PACKAGES FOUND in the already installed packages.${YLW}"
-    cat mitigationSteps.txt
-    echo "${RED}RED ALERT: INSECURE PACKAGES FOUND in the already installed packages.Follow the above guidance${NC}"
-    exit 1
-  else
-   echo "${GRN}No insecure packages found in the already installed packages.${NC}"
   fi
+done 
+
+# If insecure packages are found among installed packages, show alert and mitigation steps
+if [ $FOUND_INSECURE_PACKAGES -gt 0 ]; then
+  echo "${RED}RED ALERT: INSECURE PACKAGES FOUND in the already installed packages.${YLW}"
+  cat mitigationSteps.txt
+  echo "${RED}RED ALERT: INSECURE PACKAGES FOUND in the already installed packages.Follow the above guidance${NC}"
+  #exit 1
+else
+  echo "${GRN}No insecure packages found in the already installed packages.${NC}"
+fi
+
+# Simulate npm install to get list of packages that would be installed
 PACKAGES_TO_INSTALL=($(npm install --dry-run --silent --json | jq -r '.added[]? | select(.name) | .name'))
+
+# Check if any to-be-installed package matches the insecure list
 for PACKAGE in "${PACKAGES_TO_INSTALL[@]}"; do
   if echo "$INSECURE_PACKAGES" | grep -Fxq "$PACKAGE"; then
     echo -e "${YLW}Warning: Package $PACKAGE is listed as insecure.${NC}"
     FOUND_INSECURE_PACKAGES=$((FOUND_INSECURE_PACKAGES + 1))
   fi
 done
+
+# If insecure packages are found among to-be-installed packages, abort installation
 if [ $FOUND_INSECURE_PACKAGES -gt 0 ]; then
-  echo "${RED}Danger: Abort installation due to insecure package detection.${NC}"
+  echo "${RED}Danger: DO NOT INSTALL or UPGRADE packages due to potential insecure package detection in future install.${NC}"
   exit 1
 else
-echo "${GRN}All packages are safe.${NC}"
+  echo "${GRN}All packages are safe.${NC}"
 fi
-
-
