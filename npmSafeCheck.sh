@@ -43,28 +43,13 @@ fi
 
 echo "${GRN}Checking to-be-installed npm packages...${NC}"
 # Simulate npm install to get list of packages that would be installed
-PACKAGES_TO_INSTALL=$(npm install --dry-run --silent --json | jq -r '.added[]? | select(.name) | .name' 2> /dev/null)
-
-if [ $? -ne 0 ]; then
-  echo "${RED}Error: Failed to simulate npm install. Ensure you are in a valid npm project directory.${NC}"
-  exit 1
-fi
-if [ ! ${PACKAGES_TO_INSTALL} ]; then
-  echo "${GRN}No new packages to install.${NC}"
-  exit 0
-fi
+PACKAGES_TO_INSTALL=$(npm install --dry-run --ignore-scripts 2> /dev/null)
 # Check if any to-be-installed package matches the insecure list
-for PACKAGE in "${PACKAGES_TO_INSTALL[@]}"; do
-  if echo "$INSECURE_PACKAGES" | grep -Fxq "$PACKAGE"; then
-    echo -e "${YLW}Warning: Package $PACKAGE is listed as insecure.${NC}"
-    FOUND_INSECURE_PACKAGES=$((FOUND_INSECURE_PACKAGES + 1))
-  fi
-done
-
-# If insecure packages are found among to-be-installed packages, abort installation
-if [ $FOUND_INSECURE_PACKAGES -gt 0 ]; then
-  echo "${RED}Danger: DO NOT INSTALL or UPGRADE packages due to potential insecure package detection in future install.${NC}"
+  if "$PACKAGES_TO_INSTALL" | grep -E "$INSECURE_PACKAGES" > /dev/null; then
+    echo -e "${YLW}Warning: One or more Package is insecure.${NC}"
+    echo "$PACKAGES_TO_INSTALL" | grep -E "$INSECURE_PACKAGES"
+    echo "${RED}Danger: DO NOT INSTALL or UPGRADE packages due to potential insecure package detection in future install.${NC}"
   exit 1
-else
-  echo "${GRN}All packages are safe.${NC}"
-fi
+  else
+    echo "${GRN}No insecure packages found in the to-be-installed packages.${NC}"
+  fi
