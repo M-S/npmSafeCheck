@@ -1,0 +1,16 @@
+{
+  "name": "npmsafecheck",
+  "version": "1.0.0",
+  "description": "check for vulnerable npm packages",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test",
+    "lint": "eslint .",
+    "safe": "sh npmSafeCheck.sh"
+  },
+  "author": "Mariam",
+  "license": "ISC",
+  "dependencies": {
+    "eslint": "^9.36.0"
+  }
+}

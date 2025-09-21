@@ -1,0 +1,8 @@
+Npm security check
+description: Check for vulnerable npm packages and provide mitigation steps
+runs:
+  using: "composite"
+  steps:
+    - name: Check for vulnerable npm packages
+      shell: bash
+      run: sh ./npmSafeCheck.sh
