@@ -1,4 +1,4 @@
-Npm security check
+name: Npm security check
 description: Check for vulnerable npm packages and provide mitigation steps
 runs:
   using: "composite"
