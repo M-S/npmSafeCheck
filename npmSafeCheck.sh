@@ -49,7 +49,7 @@ if [ $? -ne 0 ]; then
   echo "${RED}Error: Failed to simulate npm install. Ensure you are in a valid npm project directory.${NC}"
   exit 1
 fi
-if [ ${#PACKAGES_TO_INSTALL[@]} -eq 0 ]; then
+if [ ! ${PACKAGES_TO_INSTALL} ]; then
   echo "${GRN}No new packages to install.${NC}"
   exit 0
 fi
