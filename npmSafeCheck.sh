@@ -21,8 +21,8 @@ if [ $? -eq 0 ]; then
   echo "${GRN}Checking already installed npm packages...${NC}"
   # Check if any installed package matches the insecure list
   for INSECURE_PKG in $(jq -r '.[]' npmMalwareChecklist.json); do
-    if [ $(echo "$PACKAGES_ALREADY_INSTALLED" | grep "$INSECURE_PKG"  | wc -l) -gt 0 ]; then
-      echo "${YLW}Warning: "$INSECURE_PKG" package found in the installed packages.${NC}"
+    if [ "$(echo "$PACKAGES_ALREADY_INSTALLED" | grep -c "$INSECURE_PKG")" -gt 0 ]; then
+      echo "${YLW}Warning: $INSECURE_PKG package found in the installed packages.${NC}"
       FOUND_INSECURE_PACKAGES=$((FOUND_INSECURE_PACKAGES + 1))
     fi
   done 
@@ -48,6 +48,10 @@ PACKAGES_TO_INSTALL=$(npm install --dry-run --silent --json | jq -r '.added[]? |
 if [ $? -ne 0 ]; then
   echo "${RED}Error: Failed to simulate npm install. Ensure you are in a valid npm project directory.${NC}"
   exit 1
+fi
+if [ ${#PACKAGES_TO_INSTALL[@]} -eq 0 ]; then
+  echo "${GRN}No new packages to install.${NC}"
+  exit 0
 fi
 # Check if any to-be-installed package matches the insecure list
 for PACKAGE in "${PACKAGES_TO_INSTALL[@]}"; do

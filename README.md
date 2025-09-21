@@ -17,6 +17,8 @@ This repository provides a script to check for known malicious npm packages (eg:
         }
    ```
 4. If the script detects any known malicious packages, it will flag and provide guidance on mitigation steps.
+   ![screenshot](./assets/alert-msg.png)
+
 5. You can also refer to a database of known compromised packages instead of the local JSON file.
 6. An example of how to integrate this script into a CI/CD pipeline is provided in the `.github/workflows/ci.yml` file.
 
@@ -73,11 +75,11 @@ git push origin --delete shai-hulud
 
 - Audit environments (CI/CD agents, developer laptops) that installed the affected versions for unauthorized publishes or credential theft.
 - Rotate npm tokens and other exposed secrets if these packages were present on machines with publishing credentials.
-- Turn on multi factor authentication on GitHub and npm.
+- Turn on multifactor authentication on GitHub and npm.
 - Audit Cloud Infrastructure for Compromise
 - Monitor network logs for active exploitation.
 - Monitor logs for unusual npm publish or package modification events.
 
-Further guidances and references: https://www.stepsecurity.io/blog/ctrl-tinycolor-and-40-npm-packages-compromised#immediate-actions-required
+Further guidance's and references: https://www.stepsecurity.io/blog/ctrl-tinycolor-and-40-npm-packages-compromised#immediate-actions-required
 https://socket.dev/blog/tinycolor-supply-chain-attack-affects-40-packages
 https://www.aikido.dev/blog/s1ngularity-nx-attackers-strike-again
