@@ -43,7 +43,7 @@ fi
 
 echo "${GRN}Checking to-be-installed npm packages...${NC}"
 # Simulate npm install to get list of packages that would be installed
-PACKAGES_TO_INSTALL=($(npm install --dry-run --silent --json | jq -r '.added[]? | select(.name) | .name' 2> /dev/null))
+PACKAGES_TO_INSTALL=$(npm install --dry-run --silent --json | jq -r '.added[]? | select(.name) | .name' 2> /dev/null)
 
 if [ $? -ne 0 ]; then
   echo "${RED}Error: Failed to simulate npm install. Ensure you are in a valid npm project directory.${NC}"
